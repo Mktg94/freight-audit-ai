@@ -109,18 +109,22 @@ create table if not exists public.audit_logs (
 -- Organizations
 alter table public.organizations enable row level security;
 
+drop policy if exists "orgs_select_own" on public.organizations;
 create policy "orgs_select_own" on public.organizations
 for select using (owner_id = auth.uid());
 
+drop policy if exists "orgs_insert_own" on public.organizations;
 create policy "orgs_insert_own" on public.organizations
 for insert with check (owner_id = auth.uid());
 
+drop policy if exists "orgs_update_own" on public.organizations;
 create policy "orgs_update_own" on public.organizations
 for update using (owner_id = auth.uid());
 
 -- Contracts
 alter table public.contracts enable row level security;
 
+drop policy if exists "contracts_select_own" on public.contracts;
 create policy "contracts_select_own" on public.contracts
 for select using (
   org_id in (
@@ -128,6 +132,7 @@ for select using (
   )
 );
 
+drop policy if exists "contracts_insert_own" on public.contracts;
 create policy "contracts_insert_own" on public.contracts
 for insert with check (
   org_id in (
@@ -135,6 +140,7 @@ for insert with check (
   )
 );
 
+drop policy if exists "contracts_update_own" on public.contracts;
 create policy "contracts_update_own" on public.contracts
 for update using (
   org_id in (
@@ -142,6 +148,7 @@ for update using (
   )
 );
 
+drop policy if exists "contracts_delete_own" on public.contracts;
 create policy "contracts_delete_own" on public.contracts
 for delete using (
   org_id in (
@@ -152,6 +159,7 @@ for delete using (
 -- Invoices
 alter table public.invoices enable row level security;
 
+drop policy if exists "invoices_select_own" on public.invoices;
 create policy "invoices_select_own" on public.invoices
 for select using (
   org_id in (
@@ -159,6 +167,7 @@ for select using (
   )
 );
 
+drop policy if exists "invoices_insert_own" on public.invoices;
 create policy "invoices_insert_own" on public.invoices
 for insert with check (
   org_id in (
@@ -166,6 +175,7 @@ for insert with check (
   )
 );
 
+drop policy if exists "invoices_update_own" on public.invoices;
 create policy "invoices_update_own" on public.invoices
 for update using (
   org_id in (
@@ -176,6 +186,7 @@ for update using (
 -- Line items
 alter table public.line_items enable row level security;
 
+drop policy if exists "line_items_select_own" on public.line_items;
 create policy "line_items_select_own" on public.line_items
 for select using (
   invoice_id in (
@@ -186,6 +197,7 @@ for select using (
   )
 );
 
+drop policy if exists "line_items_insert_own" on public.line_items;
 create policy "line_items_insert_own" on public.line_items
 for insert with check (
   invoice_id in (
@@ -196,6 +208,7 @@ for insert with check (
   )
 );
 
+drop policy if exists "line_items_update_own" on public.line_items;
 create policy "line_items_update_own" on public.line_items
 for update using (
   invoice_id in (
@@ -209,6 +222,7 @@ for update using (
 -- Disputes
 alter table public.disputes enable row level security;
 
+drop policy if exists "disputes_select_own" on public.disputes;
 create policy "disputes_select_own" on public.disputes
 for select using (
   org_id in (
@@ -216,6 +230,7 @@ for select using (
   )
 );
 
+drop policy if exists "disputes_insert_own" on public.disputes;
 create policy "disputes_insert_own" on public.disputes
 for insert with check (
   org_id in (
@@ -223,6 +238,7 @@ for insert with check (
   )
 );
 
+drop policy if exists "disputes_update_own" on public.disputes;
 create policy "disputes_update_own" on public.disputes
 for update using (
   org_id in (
@@ -233,6 +249,7 @@ for update using (
 -- Audit logs
 alter table public.audit_logs enable row level security;
 
+drop policy if exists "audit_logs_select_own" on public.audit_logs;
 create policy "audit_logs_select_own" on public.audit_logs
 for select using (
   org_id in (
@@ -240,6 +257,7 @@ for select using (
   )
 );
 
+drop policy if exists "audit_logs_insert_own" on public.audit_logs;
 create policy "audit_logs_insert_own" on public.audit_logs
 for insert with check (
   org_id in (

@@ -1,5 +1,6 @@
 import { FileText, DollarSign, TrendingDown, AlertTriangle, Upload } from 'lucide-react';
 import Link from 'next/link';
+import { headers } from 'next/headers';
 import { StatCard } from '@/components/dashboard/StatCard';
 import { SavingsChart } from '@/components/dashboard/SavingsChart';
 import { RecentActivityFeed } from '@/components/dashboard/RecentActivityFeed';
@@ -34,8 +35,10 @@ interface StatsData {
 
 async function getStats(): Promise<StatsData | null> {
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
-    const res = await fetch(`${baseUrl}/api/stats`, { cache: 'no-store' });
+    const headersList = await headers();
+    const host = headersList.get('host') || 'localhost:3000';
+    const protocol = host.includes('localhost') || host.includes('127.0.0.1') ? 'http' : 'https';
+    const res = await fetch(`${protocol}://${host}/api/stats`, { cache: 'no-store' });
     if (!res.ok) return null;
     const json = await res.json();
     if (!json.success) return null;

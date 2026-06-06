@@ -1,6 +1,5 @@
 import { NextRequest } from 'next/server';
-import { cookies } from 'next/headers';
-import { getSupabaseServerClient, getAuthenticatedUserOrgId } from '@/lib/supabase/server';
+import { getSupabaseServerClientAsync, getAuthenticatedUserOrgId } from '@/lib/supabase/server';
 import { generateDisputeLetterWithClaude } from '@/lib/ai/generateDispute';
 
 export async function GET() {
@@ -10,8 +9,7 @@ export async function GET() {
       return Response.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }
 
-    const cookieStore = cookies();
-    const supabase = getSupabaseServerClient(cookieStore);
+    const supabase = await getSupabaseServerClientAsync();
 
     const { data, error } = await supabase
       .from('disputes')
@@ -38,8 +36,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const cookieStore = cookies();
-    const supabase = getSupabaseServerClient(cookieStore);
+    const supabase = await getSupabaseServerClientAsync();
 
     let disputeLetterText = body.dispute_letter_text;
 

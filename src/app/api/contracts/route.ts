@@ -1,6 +1,5 @@
 import { NextRequest } from 'next/server';
-import { cookies } from 'next/headers';
-import { getSupabaseServerClient, getAuthenticatedUserOrgId } from '@/lib/supabase/server';
+import { getSupabaseServerClientAsync, getAuthenticatedUserOrgId } from '@/lib/supabase/server';
 
 export async function GET() {
   try {
@@ -9,8 +8,7 @@ export async function GET() {
       return Response.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }
 
-    const cookieStore = cookies();
-    const supabase = getSupabaseServerClient(cookieStore);
+    const supabase = await getSupabaseServerClientAsync();
 
     const { data, error } = await supabase
       .from('contracts')
@@ -37,8 +35,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const cookieStore = cookies();
-    const supabase = getSupabaseServerClient(cookieStore);
+    const supabase = await getSupabaseServerClientAsync();
 
     const { data, error } = await supabase
       .from('contracts')

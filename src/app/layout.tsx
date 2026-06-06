@@ -28,7 +28,7 @@ export default function RootLayout({
       lang="en"
       className={`${syne.variable} ${dmSans.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col font-[var(--font-dm-sans)]">
+      <body className="min-h-full flex flex-col font-[var(--font-dm-sans)]" suppressHydrationWarning>
         <ToastProvider>{children}</ToastProvider>
       </body>
     </html>

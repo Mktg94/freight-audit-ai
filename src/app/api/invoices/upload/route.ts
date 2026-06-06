@@ -1,6 +1,5 @@
 import { NextRequest } from 'next/server';
-import { cookies } from 'next/headers';
-import { getSupabaseServerClient, getAuthenticatedUserOrgId } from '@/lib/supabase/server';
+import { getSupabaseServerClientAsync, getAuthenticatedUserOrgId } from '@/lib/supabase/server';
 import { extractInvoiceWithClaude } from '@/lib/ai/extractInvoice';
 
 export async function POST(request: NextRequest) {
@@ -34,8 +33,7 @@ export async function POST(request: NextRequest) {
 
     const extractedData = await extractInvoiceWithClaude(extractedText);
 
-    const cookieStore = cookies();
-    const supabase = getSupabaseServerClient(cookieStore);
+    const supabase = await getSupabaseServerClientAsync();
 
     const { data: invoiceData, error: invoiceError } = await supabase
       .from('invoices')

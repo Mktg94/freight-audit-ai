@@ -3,12 +3,7 @@ import 'server-only';
 import { cookies } from 'next/headers';
 import { createServerClient } from '@supabase/ssr';
 
-type CookieStore = ReturnType<typeof cookies>;
-
-// NOTE: This project expects you to set:
-// NEXT_PUBLIC_SUPABASE_URL
-// NEXT_PUBLIC_SUPABASE_ANON_KEY
-// SUPABASE_SERVICE_ROLE_KEY (used server-side only in routes)
+type CookieStore = Awaited<ReturnType<typeof cookies>>;
 
 export function getSupabaseServerClient(cookieStore: CookieStore) {
   return createServerClient(
@@ -17,23 +12,20 @@ export function getSupabaseServerClient(cookieStore: CookieStore) {
     {
       cookies: {
         get(name) {
-          // next/headers cookies() returns a Promise-like type in this project setup
-          // Handle both sync and async shapes safely.
-          if (typeof (cookieStore as unknown as { get?: unknown }).get === 'function') {
-            return (cookieStore as unknown as { get: (n: string) => { value: string } | undefined }).get(name)?.value;
-          }
-
-          return undefined;
+          return cookieStore.get(name)?.value;
         },
       },
     }
   );
 }
 
+export async function getSupabaseServerClientAsync() {
+  const cookieStore = await cookies();
+  return getSupabaseServerClient(cookieStore);
+}
 
 export async function getAuthenticatedUserOrgId() {
-  const cookieStore = cookies();
-  const supabase = getSupabaseServerClient(cookieStore);
+  const supabase = await getSupabaseServerClientAsync();
   const {
     data: { user },
     error,
@@ -41,15 +33,12 @@ export async function getAuthenticatedUserOrgId() {
 
   if (error || !user) return null;
 
-  // Organization lookup is done by querying organizations table.
-  // Keep this generic; actual org ownership logic should be enforced by RLS.
   const { data: orgRow } = await supabase
     .from('organizations')
     .select('id')
     .eq('owner_id', user.id)
     .maybeSingle();
 
-  // Keep strict typing simple; rely on RLS for correctness.
   const id = (orgRow as { id?: string } | null)?.id;
   return id ?? null;
 }
