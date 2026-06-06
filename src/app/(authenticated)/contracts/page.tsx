@@ -32,7 +32,20 @@ export default function ContractsPage() {
     try {
       const res = await fetch('/api/contracts');
       const data = await res.json();
-      setContracts(data.contracts ?? data ?? []);
+      const rawList = data.data ?? data.contracts ?? [];
+      setContracts(
+        rawList.map((c: Record<string, unknown>) => ({
+          id: c.id,
+          carrier_name: c.carrier_name,
+          effective_date: c.effective_date,
+          expiry_date: c.expiry_date,
+          key_rates: {
+            rate_per_lb: c.base_rate_per_lb != null ? Number(c.base_rate_per_lb) : undefined,
+            rate_per_mile: c.base_rate_per_mile != null ? Number(c.base_rate_per_mile) : undefined,
+            minimum_charge: c.minimum_charge != null ? Number(c.minimum_charge) : undefined,
+          },
+        }))
+      );
     } catch {
       setContracts([]);
     } finally {

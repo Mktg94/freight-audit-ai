@@ -1,11 +1,6 @@
 import 'server-only';
 
-
-
-import type {
-  AuditInvoiceResult,
-  ExtractedInvoiceLineItem,
-} from '@/types';
+import type { AuditInvoiceResult, ExtractedInvoiceLineItem } from '@/types';
 
 function buildAuditPrompt(contractJson: unknown, lineItemsJson: unknown) {
   return `You are a freight billing auditor. Compare each invoice line item against the contract rates provided.
@@ -34,26 +29,23 @@ Only flag items where there is a clear, calculable discrepancy.
 For items not in the contract, flag as "not_in_contract" with confidence 0.7.`;
 }
 
-export async function auditInvoiceWithClaude(params: {
+export async function auditInvoiceWithGemini(params: {
   contractJson: unknown;
   lineItems: ExtractedInvoiceLineItem[];
 }): Promise<AuditInvoiceResult> {
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) throw new Error('Missing ANTHROPIC_API_KEY');
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) throw new Error('Missing GEMINI_API_KEY');
 
   const prompt = buildAuditPrompt(params.contractJson, params.lineItems);
 
-  const { claudeMessagesCreate } = await import('./claudeClient');
-  const text = await claudeMessagesCreate({
-    apiKey,
-    model: 'claude-haiku-3',
-    maxTokens: 1800,
-    temperature: 0,
+  const { geminiGenerateText } = await import('./geminiClient');
+  const text = await geminiGenerateText({
     system: 'Return ONLY JSON. No Markdown.',
     userContent: prompt,
+    temperature: 0,
   });
 
-  const parsed = JSON.parse(text) as AuditInvoiceResult;
+  const cleaned = text.replace(/```(?:json)?\s*/gi, '').trim();
+  const parsed = JSON.parse(cleaned) as AuditInvoiceResult;
   return parsed;
 }
-

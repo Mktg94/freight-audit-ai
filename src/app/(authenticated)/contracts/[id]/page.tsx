@@ -19,8 +19,23 @@ export default function EditContractPage({
       const { id } = await params;
       try {
         const res = await fetch(`/api/contracts/${id}`);
-        const data = await res.json();
-        setInitialData(data.contract ?? data);
+        const json = await res.json();
+        const c = json.data ?? json.contract ?? json;
+        setInitialData({
+          carrier_name: c.carrier_name ?? '',
+          effective_date: c.effective_date ?? '',
+          expiry_date: c.expiry_date ?? '',
+          rate_per_lb: c.base_rate_per_lb ?? '',
+          rate_per_mile: c.base_rate_per_mile ?? '',
+          minimum_charge: '',
+          fuel_surcharge: c.fuel_surcharge_pct ?? '',
+          residential_delivery_fee: c.residential_surcharge ?? '',
+          liftgate_fee: c.liftgate_fee ?? '',
+          detention_rate: c.detention_rate_per_hr ?? '',
+          inside_delivery_fee: c.inside_delivery_fee ?? '',
+          redelivery_fee: '',
+          custom_rules: c.custom_rules ?? [],
+        });
       } catch {
         setInitialData(null);
       } finally {
@@ -29,12 +44,12 @@ export default function EditContractPage({
     })();
   }, [params]);
 
-  const handleSubmit = async (data: any) => {
+  const handleSubmit = async (formData: any) => {
     const { id } = await params;
     const res = await fetch(`/api/contracts/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
+      body: JSON.stringify(formData),
     });
     if (res.ok) {
       router.push('/contracts');

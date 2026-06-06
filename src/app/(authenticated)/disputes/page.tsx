@@ -33,7 +33,10 @@ export default function DisputesPage() {
   useEffect(() => {
     fetch('/api/disputes')
       .then((res) => res.json())
-      .then((data) => setDisputes(data))
+      .then((data) => {
+        const list = data.data ?? data.disputes ?? [];
+        setDisputes(Array.isArray(list) ? list : []);
+      })
       .catch(() => {})
       .finally(() => setLoading(false));
   }, []);

@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server';
-import { getSupabaseServerClientAsync, getSupabaseAdminClient } from '@/lib/supabase/server';
+import { getSupabaseAdminClient } from '@/lib/supabase/server';
 
 export async function POST(request: NextRequest) {
   try {
@@ -28,15 +28,6 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (orgError) throw orgError;
-
-    const supabase = await getSupabaseServerClientAsync();
-
-    const { error: signInError } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-
-    if (signInError) throw signInError;
 
     return Response.json(
       { success: true, data: { user: userData.user, organization: orgData } },

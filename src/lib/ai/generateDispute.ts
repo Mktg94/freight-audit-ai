@@ -1,10 +1,8 @@
 import 'server-only';
 
-
-
 import type { AuditInvoiceResult } from '@/types';
 
-export async function generateDisputeLetterWithClaude(params: {
+export async function generateDisputeLetterWithGemini(params: {
   companyName: string;
   carrierName: string;
   invoiceNumber: string;
@@ -12,9 +10,6 @@ export async function generateDisputeLetterWithClaude(params: {
   disputedItems: AuditInvoiceResult;
   totalDisputed: number;
 }): Promise<string> {
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) throw new Error('Missing ANTHROPIC_API_KEY');
-
   const prompt = `You are a professional freight billing dispute specialist. 
 Write a formal, firm, professional dispute letter for the following billing discrepancies.
 
@@ -34,16 +29,12 @@ The letter should:
 
 Return only the letter text, no JSON.`;
 
-  const { claudeMessagesCreate } = await import('./claudeClient');
-  const text = await claudeMessagesCreate({
-    apiKey,
-    model: 'claude-haiku-3',
-    maxTokens: 1000,
-    temperature: 0.2,
+  const { geminiGenerateText } = await import('./geminiClient');
+  const text = await geminiGenerateText({
     system: 'Write a professional dispute letter. Return only text.',
     userContent: prompt,
+    temperature: 0.2,
   });
 
   return text.trim();
 }
-

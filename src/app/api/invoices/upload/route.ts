@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server';
 import { getSupabaseServerClientAsync, getAuthenticatedUserOrgId } from '@/lib/supabase/server';
-import { extractInvoiceWithClaude } from '@/lib/ai/extractInvoice';
+import { extractInvoiceWithVeryfi } from '@/lib/ai/extractInvoice';
 
 export async function POST(request: NextRequest) {
   try {
@@ -23,15 +23,7 @@ export async function POST(request: NextRequest) {
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
 
-    const { PDFParse } = await import('pdf-parse');
-    const pdfDoc = new PDFParse({ data: buffer });
-    const { text: extractedText } = await pdfDoc.getText();
-
-    if (!extractedText || extractedText.trim().length === 0) {
-      return Response.json({ success: false, error: 'Could not extract text from PDF' }, { status: 400 });
-    }
-
-    const extractedData = await extractInvoiceWithClaude(extractedText);
+    const { extractedText, extractedData } = await extractInvoiceWithVeryfi(buffer, file.name);
 
     const supabase = await getSupabaseServerClientAsync();
 

@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { getSupabaseBrowserClient } from '@/lib/supabase/client';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -40,6 +41,18 @@ export default function SignupPage() {
 
     if (!data.success) {
       setError(data.error || 'Registration failed');
+      setLoading(false);
+      return;
+    }
+
+    const supabase = getSupabaseBrowserClient();
+    const { error: signInError } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (signInError) {
+      setError('Account created but sign-in failed. Please try logging in.');
       setLoading(false);
       return;
     }

@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server';
 import { getSupabaseServerClientAsync, getAuthenticatedUserOrgId } from '@/lib/supabase/server';
-import { generateDisputeLetterWithClaude } from '@/lib/ai/generateDispute';
+import { generateDisputeLetterWithGemini } from '@/lib/ai/generateDispute';
 
 export async function GET() {
   try {
@@ -75,7 +75,7 @@ export async function POST(request: NextRequest) {
 
       const totalDisputed = auditResult.reduce((sum, item) => sum + Math.abs(item.discrepancy), 0);
 
-      disputeLetterText = await generateDisputeLetterWithClaude({
+      disputeLetterText = await generateDisputeLetterWithGemini({
         companyName: '',
         carrierName: invoice.carrier_name ?? '',
         invoiceNumber: invoice.invoice_number ?? '',

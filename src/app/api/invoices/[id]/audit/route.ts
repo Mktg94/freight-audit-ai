@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server';
 import { getSupabaseServerClientAsync, getAuthenticatedUserOrgId } from '@/lib/supabase/server';
-import { auditInvoiceWithClaude } from '@/lib/ai/auditInvoice';
+import { auditInvoiceWithGemini } from '@/lib/ai/auditInvoice';
 
 export async function POST(
   _request: NextRequest,
@@ -49,7 +49,7 @@ export async function POST(
       contractJson = contract;
     }
 
-    const auditResult = await auditInvoiceWithClaude({
+    const auditResult = await auditInvoiceWithGemini({
       contractJson,
       lineItems: (lineItems ?? []).map((li) => ({
         description: li.description,

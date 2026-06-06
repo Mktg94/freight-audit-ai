@@ -38,7 +38,7 @@ export default function UploadInvoicePage() {
     fetch('/api/contracts')
       .then((r) => r.json())
       .then((data) => {
-        const list = data.contracts ?? data ?? [];
+        const list = data.data ?? data.contracts ?? [];
         setContracts(list);
       })
       .catch(() => {});
@@ -95,7 +95,7 @@ export default function UploadInvoicePage() {
       });
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
-        throw new Error(err.message || 'Upload failed');
+        throw new Error(err.error || err.message || 'Upload failed');
       }
       const data = await res.json();
       setInvoiceId(data.id);
