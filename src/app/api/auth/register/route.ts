@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server';
-import { getSupabaseServerClientAsync } from '@/lib/supabase/server';
+import { getSupabaseServerClientAsync, getSupabaseAdminClient } from '@/lib/supabase/server';
 
 export async function POST(request: NextRequest) {
   try {
@@ -9,27 +9,37 @@ export async function POST(request: NextRequest) {
       return Response.json({ success: false, error: 'Email, password, and companyName are required' }, { status: 400 });
     }
 
-    const supabase = await getSupabaseServerClientAsync();
+    const admin = getSupabaseAdminClient();
 
-    const { data: authData, error: signUpError } = await supabase.auth.signUp({
+    const { data: userData, error: createError } = await admin.auth.admin.createUser({
       email,
       password,
-      options: { data: { full_name: name } },
+      email_confirm: true,
+      user_metadata: { full_name: name },
     });
 
-    if (signUpError) throw signUpError;
-    if (!authData.user) throw new Error('User creation failed');
+    if (createError) throw createError;
+    if (!userData.user) throw new Error('User creation failed');
 
-    const { data: orgData, error: orgError } = await supabase
+    const { data: orgData, error: orgError } = await admin
       .from('organizations')
-      .insert({ name: companyName, owner_id: authData.user.id })
+      .insert({ name: companyName, owner_id: userData.user.id })
       .select()
       .single();
 
     if (orgError) throw orgError;
 
+    const supabase = await getSupabaseServerClientAsync();
+
+    const { error: signInError } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (signInError) throw signInError;
+
     return Response.json(
-      { success: true, data: { user: authData.user, organization: orgData } },
+      { success: true, data: { user: userData.user, organization: orgData } },
       { status: 201 }
     );
   } catch (error) {
